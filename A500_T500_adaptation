@@ -1,0 +1,70 @@
+%% Find index of all relevant events, A500, T500
+
+% Create event lists for all relevant events (A500 and T500 combined), only
+% A500, and only T500 
+eventlistAT500all = {'A500_0', 'A500_1', 'A500_2', 'A500_3', 'A500_4', 'T500_0', 'T500_1', 'T500_2', 'T500_3', 'T500_4'};
+eventlistA500 = {'A500_0', 'A500_1', 'A500_2', 'A500_3', 'A500_4'};
+eventlistT500 = {'T500_0', 'T500_1', 'T500_2', 'T500_3', 'T500_4'};
+
+allevents = {EEG.event.type};
+
+% select events from the event list
+selectALLevents = [];
+selectA500events = [];
+selectT500events = [];
+
+for e = 1:length(eventlistAT500all)
+    selectALLevents = [selectALLevents find(strncmp(eventlistAT500all{e},allevents,length(eventlistAT500all{e})))];
+end
+
+% sort the events in the complete event list
+sortedALLevents = sort(selectALLevents);
+
+for e = 1:length(eventlistA500)
+    selectA500events = [selectA500events find(strncmp(eventlistA500{e},allevents,length(eventlistA500{e})))];
+end
+
+for e = 1:length(eventlistT500)
+    selectT500events = [selectT500events find(strncmp(eventlistT500{e},allevents,length(eventlistT500{e})))];
+end
+
+%% Find A500 before T500 (versus not)
+
+selectT500events(1)
+
+% find the locations of T500 in the vector of all events
+% list of all events in loc
+[ind,loc_T500] = intersect(sortedALLevents,selectT500events);
+
+% verify that the event before the location of the first T500 is an A500
+onebeforeT500  = (loc_T500 - 1);
+onebeforeT500events = {EEG.event(sortedALLevents(onebeforeT500)).type};
+onebeforeT500events = {EEG.event(sortedALLevents(loc_T500(1))).type};
+
+% verify that these are unique events in the list
+unique(onebeforeT500events)
+
+% find the unique variables that we do not want
+
+% find the location of these unique variables
+
+% delete the variables from the list 
+
+% use 'unique' again to check that the list includes only the events that I
+% want
+unique(onebeforeT500events)
+
+% get  a vector with the desired events
+
+
+% go to vector of all A500 events, and make subvector with indices of A500
+% before T500 
+
+% delete these, and make another list of A500 not before T500 (so just pure
+% adaptor adaptation, rather than 'true adaptation' with the A500-T500
+% pairs)
+
+% delete these
+% a500 not before t500 (for other list)
+
+% always double-check!
