@@ -1,0 +1,324 @@
+%%%% Script to find all relevant indices of A500s and T500s %%%%
+
+% With this script, we want to find "true adaptation" in the adaptors
+% followed by adaptors (A500 - T500 pairs, so of the same 500Hz frequency), 
+% that follow each other closely in time. We want to distinguish this type
+% of adaptation from A500 - T of another frequency pairs, so where the A500
+% is not followed by another tone of the same frequency closely in time.
+% Then we also want to find whether there adaptation between repeated A500s
+% that do not follow each other so closely in time. 
+
+%% Find index of all relevant events, A500, T500
+
+% create event lists for all relevant events (A500 and T500 combined), then only
+% A500, and only T500.
+% here we take the first 5 repetitions, but could also only take the first 4.
+eventlistAT500all = {'A500_0', 'A500_1', 'A500_2', 'A500_3', 'A500_4', 'T500_0', 'T500_1', 'T500_2', 'T500_3', 'T500_4', 'T500_5'};
+eventlistA500 = {'A500_0', 'A500_1', 'A500_2', 'A500_3', 'A500_4', 'A500_5'};
+eventlistT500 = {'T500_0', 'T500_1', 'T500_2', 'T500_3', 'T500_4', 'T500_5'};
+
+%% For sleep files
+
+% eventlistAT500all = {'N2A500_0', 'N2A500_1', 'N2A500_2', 'N2A500_3', 'N2A500_4',...
+%                       'N3A500_0', 'N3A500_1', 'N3A500_2', 'N3A500_3', 'N3A500_4',...
+%                       'RtA500_0', 'RtA500_1', 'RtA500_2', 'RtA500_3', 'RtA500_4',...
+%                       'RpA500_0', 'RpA500_1', 'RpA500_2', 'RpA500_3', 'RpA500_4',...
+%                       'N2T500_0', 'N2T500_1', 'N2T500_2', 'N2T500_3', 'N2T500_4',...
+%                       'N3T500_0', 'N3T500_1', 'N3T500_2', 'N3T500_3', 'N3T500_4',...
+%                       'RtT500_0', 'RtT500_1', 'RtT500_2', 'RtT500_3', 'RtT500_4',...
+%                       'RpT500_0', 'RpT500_1', 'RpT500_2', 'RpT500_3', 'RpT500_4'};
+%                   
+% eventlistA500 = {'N2A500_0', 'N2A500_1', 'N2A500_2', 'N2A500_3', 'N2A500_4',...
+%                       'N3A500_0', 'N3A500_1', 'N3A500_2', 'N3A500_3', 'N3A500_4',...
+%                       'RtA500_0', 'RtA500_1', 'RtA500_2', 'RtA500_3', 'RtA500_4',...
+%                       'RpA500_0', 'RpA500_1', 'RpA500_2', 'RpA500_3', 'RpA500_4'};
+%                   
+% eventlistT500 = {'N2T500_0', 'N2T500_1', 'N2T500_2', 'N2T500_3', 'N2T500_4',...
+%                       'N3T500_0', 'N3T500_1', 'N3T500_2', 'N3T500_3', 'N3T500_4',...
+%                       'RtT500_0', 'RtT500_1', 'RtT500_2', 'RtT500_3', 'RtT500_4',...
+%                       'RpT500_0', 'RpT500_1', 'RpT500_2', 'RpT500_3', 'RpT500_4'};
+
+%%
+
+% first, find all the event names in the EEG structure.
+allevents = {EEG.event.type};
+
+% create empty vectors to store events.
+% these vectors give number indices indicating where the A500 and T500
+% events are in terms of time points.
+
+selectALLevents = []; % list of all (both A- and T500) events 
+selectA500events = []; % list of all A500 events
+selectT500events = []; % list of all T500 events
+
+% select A500 and T500 events from the complete event list
+for e = 1:length(eventlistAT500all)
+    selectALLevents = [selectALLevents find(strncmp(eventlistAT500all{e},allevents,length(eventlistAT500all{e})))];
+end
+
+% sort the events in the complete event list to find instances of A500 and
+% T500 per time point, also done in case an event was deleted 
+% (so that we know we are only taking events that exist in the data)
+
+% want to make sure we always have an instance of A500 before T500
+sortedALLevents = sort(selectALLevents);
+
+% select A500 events from the list of all events
+for e = 1:length(eventlistA500)
+    selectA500events = [selectA500events find(strncmp(eventlistA500{e},allevents,length(eventlistA500{e})))];
+end
+
+% select T500 events from the list of all events
+for e = 1:length(eventlistT500)
+    selectT500events = [selectT500events find(strncmp(eventlistT500{e},allevents,length(eventlistT500{e})))];
+end
+
+%% find A500 before T500
+% compared to when the A500 is not before a T500 (but other frequencies)
+
+% find the locations of T500 in the vector of all events
+[ind,loc_T500] = intersect(sortedALLevents,selectT500events);
+
+% verify that the event before the location of the first T500 is an A500
+onebeforeT500  = (loc_T500 - 1);
+onebeforeT500events = {EEG.event(sortedALLevents(onebeforeT500)).type};
+
+% verify that these are unique events in the list
+eventtype_beforeT500 = unique(onebeforeT500events); % also returns T500s
+                                                    % therefore have to get
+                                                    % rid of these events
+%% select undesired T500 events
+% because we get some T frequencies in the eventtype_beforeT500, we want to
+% get rid of those to leave only the A500s as the unique events before T500
+% events. 
+% we will name these the undesired_eventtypes. the undesired event types
+% are all those that are in the eventtype_beforeT500 but are not A500s. to
+% compare these, we can setdiff between the two lists.
+% undesired_eventtypes now returns the T500 tones that were in the list,
+% but that we do not want. 
+
+undesired_eventtypes = setdiff(eventtype_beforeT500,eventlistA500); % setdiff returns the data in A that is not in B
+
+if ~isempty(undesired_eventtypes) % if the cell 'undesired_eventtypes' isn't empty, 
+    % the we want to create empty vector for data to be deleted
+    tbd = []; % 'to be delected' vector
+    for i = 1:length(undesired_eventtypes) % loop over the undesired events (T500s)
+        tbd = [tbd find(strcmp(undesired_eventtypes(i),onebeforeT500events))]; % find the events to exclude
+    end
+% new variable - only A500s before T500
+onlyAbeforeT500 = onebeforeT500;
+onlyAbeforeT500(tbd) = []; % finds the locations of the T500 undesired events
+end
+
+%% 
+
+% check in EEG data struct there are only A500_0 to A500_4
+A500s = {EEG.event(sortedALLevents(onlyAbeforeT500)).type};
+A500s =  unique(A500s); % now returns only A500 events without the undesired T500s
+
+checkT500events = {EEG.event(sortedALLevents(onlyAbeforeT500) + 1).type};
+T500s = unique(checkT500events);
+
+% make sure, using setdiff, that T500s only contain the T500 events, not other tones
+% using 'unique', we find that there are some other tones other than T500s
+% therefore, call these the undesired_Teventtypes and exclude them
+undesired_Teventtypes = setdiff(T500s,eventlistT500);
+
+if ~isempty(undesired_Teventtypes) % if the cell isn't empty (i.e., there are undesired
+                                   % T event types that need to be deleted)
+    tbd = [];     % create empty vector for data to be deleted
+    for i = 1:length(undesired_Teventtypes) % loop over the undesired events (undesired tones)
+        % find undesired events in the list 
+        tbd = [tbd find(strcmp(undesired_Teventtypes(i),checkT500events))]; % to exclude
+    end
+ 
+% create new variable without these undesired tones, so leaving only
+% desired T500 events
+onlydesiredT500s = checkT500events;
+onlydesiredT500s(tbd) = []; % finds the locations of the T500 undesired events
+end
+
+%% find the A500s that are before these T500s 
+
+% first find the time points of these events
+for e = 1:length(onlydesiredT500s)
+    selectTeventtimes = [selectALLevents find(strncmp(onlydesiredT500s{e},onlydesiredT500s,length(onlydesiredT500s{e})))];
+end
+
+% verify that there are A500s before these T500 events
+[ind,loc_T500] = intersect(sortedALLevents,selectT500events);
+onebeforeTs    = (loc_T500 - 1);
+onebeforeTsverify = {EEG.event(sortedALLevents(onebeforeTs)).type};
+
+% verify that these are unique events in the list
+eventtype_beforeT500 = unique(onebeforeT500events); % also returns T500s
+
+undesired_eventtypes = setdiff(eventtype_beforeT500,eventlistA500); % setdiff returns the data in A that is not in B
+
+if ~isempty(undesired_eventtypes) % if the cell 'undesired_eventtypes' isn't empty, 
+    % the we want to create empty vector for data to be deleted
+    tbd = []; % 'to be delected' vector
+    for i = 1:length(undesired_eventtypes) % loop over the undesired events (T500s)
+        tbd = [tbd find(strcmp(undesired_eventtypes(i),onebeforeT500events))]; % find the events to exclude
+    end
+% new variable - only A500s before T500
+onlyAbeforeT500 = onebeforeT500;
+onlyAbeforeT500(tbd) = []; % finds the locations of the T500 undesired events
+end
+
+A500s = {EEG.event(sortedALLevents(onlyAbeforeT500)).type};
+A500s =  unique(A500s); % now returns only A500 events without the undesired T500s
+
+checkT500events = {EEG.event(sortedALLevents(onlyAbeforeT500) + 1).type};
+T500s = unique(checkT500events);
+
+%% find A500s that are not before T500s
+
+% now we have A500s that are before T500s, and the T500 events separately
+% listed. the next step is to find the A500s that are not before T500s.
+
+% loc_A500 gives the location of all A500 events from the complete list of events
+[~,loc_A500] = intersect(sortedALLevents,selectA500events);
+
+% take onebeforeT500 - delete from it the locations that are A500
+[~, loc_AbeforTInsideA] = intersect(loc_A500,onlyAbeforeT500);
+onlyAnotbeforeT500 = loc_A500;
+onlyAnotbeforeT500(loc_AbeforTInsideA) = [];
+
+ % check A before all T except T500
+onlyAnotbeforeT500events = {EEG.event(sortedALLevents(onlyAnotbeforeT500)).type};
+unique(onlyAnotbeforeT500events);
+
+% check T after A are not T500
+TafterA = sortedALLevents(onlyAnotbeforeT500) + 1; % gives time points of the T frequencies
+                                                   % that are after A.
+onlyAnotbeforeT500events = {EEG.event((TafterA)).type};
+checkTafterA = unique(onlyAnotbeforeT500events); % this should return a cell with the T frequencies that are not T500.
+
+%% check the location(s) of the values, i.e., where we know there is a T500
+
+% tbd returns the location of the undesired T500s
+% check, through the returned tbd vec, that these are the T500s in the list of
+% all sorted events
+% get instances of T after A for adaptors that do no precede a T500, so
+% rather precede the other tones
+
+TafterA = sortedALLevents(onlyAnotbeforeT500) + 1;
+onlyTsnotT500events = {EEG.event((TafterA)).type}; % returns the T frequencies that
+                                                        % go before A500 but are not T500
+                                                        
+TdnotT500s = unique(onlyAnotbeforeT500events); % returns all Ts that are not T500 
+                                             % (and also some unwanted As)
+                                 
+% notT500s also includes some unwanted A500 repetitions. now we should get
+% rid of those as well.
+desiredTswithoutAs = setdiff(TsnotT500s,eventlistA500);
+if ~isempty(undesired_TinAeventtypes)
+    % create empty vector for data to be deleted
+    tbd = [];
+    % loop over the undesired events (undesired tones)
+    for i = 1:length(undesired_TinAeventtypes)
+        % find undesired events in the list 
+        tbd = [tbd find(strcmp(undesired_TinAeventtypes(i),onlyTsnotT500events))]; % to exclude
+    end
+% create new variable without these undesired tones, leaving only desired T500 events
+onlydesiredAevents = onlyAnotbeforeT500events;
+onlydesiredAevents(tbd) = []; % finds the locations of the T500 undesired events
+
+end
+
+% if ~isempty(desired_Teventtypes)
+%     % create empty vector for data to be deleted
+%     tbd = [];
+%     % loop over the undesired events (undesired tones)
+%     for i = 1:length(desired_Teventtypes)
+%         % find undesired events in the list 
+%         tbd = [tbd find(strcmp(desired_Teventtypes(i),onebeforeT500events))]; % to exclude
+%     end
+
+% create new variable without these undesired tones, so leaving only
+% desired T500 events.
+% onlydesiredTevents = onlyTsnotT500events;
+% % should check this again
+
+% onlydesiredTevents(tbd) = []; % finds the locations of the T500 undesired events
+% 
+% end 
+
+% now there are lists of A500s that we want, T500s that we want, and then
+% other T events. first want to find A500s that come before the desired T
+% events. 
+% now create vectors of these events: 
+
+onlyA500s = [onlydesiredTevents];
+onlyT500s = [onlydesiredTevents];
+
+% % % find the location in onebeforeT500 events
+% % find(strcmp('T500_0',onebeforeT500events)) = returns, e.g., 16 for one
+% subject
+
+% find also for another single subject, and then get analyses in terms of
+% single sub
+
+% % replace tbd also with the number (loc) returned by the 'find' function
+(EEG.event(sortedALLevents(onebeforeT500(tbd))).type)
+
+
+% new variable: all As that are NOT before T500 - take all As and delete all
+% locations of As that are before T500s
+
+% one vec - all before T500s
+
+% one vec - not before T500s
+
+
+% check every time in the matrix for appropriate type
+
+
+% find the location of these unique variables
+
+% [ind,loc_onebeforeT500] = intersect(selectT500events,onlyAnotbeforeT500);
+
+
+% loc_onebeforeT500 are the locations of A500 events that precede T500
+
+
+% use 'unique' again to check the list includes only the events that I want
+% unique(onebeforeT500events)
+
+
+% get  a vector with the desired events
+% vecdesiredevents = [];
+% vecdesiredevents = [unique()];
+
+
+% go to vector of all A500 events, and make subvector with indices of A500
+% before T500 
+
+% selectA500events(1)
+
+
+% verify that these are unique events in the list
+% unique(onebeforeA500events)
+
+
+% find the unique variables that we do not want
+
+% delete these, make another list of A500 not before T500 (so just pure
+% adaptor adaptation, rather than 'true adaptation' with the A500-T500 pairs)
+
+
+% a500 not before t500 (for other list)
+% find events that are and events that aren't before compatible in the list
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% extra lines from the script/pointers %%
+
+% [ind,loc_A500] = intersect(sortedALLevents, selectA500events);
+% onebeforeA500 = (loc_A500 - 1); % one value in front of the T500 values
+
+% onebeforeA500events = {EEG.event(sortedALLevents(oneafterA500)).type};
+% onebeforeA500events = {EEG.event(sortedALLevents(loc_A500(1))).type};
+
+% sanity check, a similar way: always look inside the "sorted" list, 
+% and put inside paranetheses the variable I want to look at
