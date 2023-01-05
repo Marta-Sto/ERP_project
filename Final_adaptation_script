@@ -132,7 +132,7 @@ A500sevents = sortedALLevents(onebeforeT500);
 
 %% Index the desired data
 
-events = [EEG.epoch]';
+events = [EEG.epoch.event]';
 A = ismember(events,A500sevents);
 a = find(A == 1);
 
