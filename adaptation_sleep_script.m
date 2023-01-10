@@ -4,15 +4,11 @@
 % (when two tones of the same frequency follow each other close in time, i.e., 
 % A500 - T500 pairs of the same 500Hz frequency). 
 
-function adaptation_ERPs_script
 %% Load eeglab and the file
-
-% call eeglab
-% make sure to navigate to eeglab folder
+% call eeglab (make sure to navigate to the eeglab folder)
 eeglab
 
-%% Set up paths and eeglab
-
+%% Set up paths
 in_datadir  = '/Volumes/New Volume/ica_interpolated'; % on Mac
 out_datadir = '/Users/stojanovic/Documents/Projects/Cambridge/Analyses/Adaptor/NewEEGFilesAdaptor';
 
@@ -25,6 +21,7 @@ sub = {'02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',...
        '13', '14', '15', '16', '17', '19', '20', '21', '23', '24', '25',...
        '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36',...
        '37', '38'};
+
 
 %% Find the index of all relevant events: A500s and T500s
 
@@ -191,5 +188,4 @@ save -mat EEG_32_wake.set EEG
 % Save the .fdt file per subject.
 data = EEG;
 data = 'EEG_32_wake.fdt';
-floatwrite(data(:,:)', 'EEG_32_wake.fdt');
-end 
+floatwrite(data(:,:)', 'EEG_32_wake.fdt'); 
