@@ -119,7 +119,7 @@ T500sevents      = unique(T500sevents);
 % Make sure that T500s only contain the T500 events.
 % This step can be skipped in case there are no anomalies in the cell.
 
-undesired_eventtypes = setdiff(T500sevents,eventlistT500); % if other events/undesired events exist,
+undesired_eventtypes = setdiff(T500sevents,sleepeventsT500); % if other events/undesired events exist,
                                                            % use set diff to find and exclude them
 
 if ~isempty(undesired_eventtypes) % if the cell isn't empty, i.e., there are undesired T events,
