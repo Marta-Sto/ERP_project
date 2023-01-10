@@ -91,7 +91,7 @@ eventtype_beforeT500 = unique(onebeforeT500events);
 %% Remove undesired T500 events
 
 % undesired_eventtypes now returns the T500 tones in the list that we do not want. 
-undesired_eventtypes = setdiff(eventtype_beforeT500,eventlistA500);
+undesired_eventtypes = setdiff(eventtype_beforeT500,sleepeventsA500);
 
 % Sleep 
 % undesired_eventtypes = setdiff(eventtype_beforeT500,sleepeventsA500);
