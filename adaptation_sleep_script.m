@@ -158,29 +158,29 @@ T = ismember(events,T500sevents);
 % T = events(a - 1);
 t = find(T == 1);
 
-% A500s
-for e = 1:length(a)
-    if strcmp(EEG.epoch(a(e)).eventtype(1:4),'A500')
-        EEG.epoch(a(e)).eventtype = [EEG.epoch(a(e)).eventtype '_bT'];
-    end
-end 
-
 % T500s
 for e = 1:length(t)
-    if strcmp(EEG.epoch(t(e)).eventtype(1:4),'T500')
+    if strcmp(EEG.epoch(t(e)).eventtype(1:4),'N2T500')
         EEG.epoch(t(e)).eventtype = [EEG.epoch(t(e)).eventtype '_bT'];
     end
 end
 
-% Sleep
-% for e = 1:length(a)
-%     % check that the event type is indeed one of the A500s
-%     if strcmp(EEG.epoch(a(e)).eventtype(1:4),'N3A500')
-%         EEG.epoch(a(e)).eventtype = [EEG.epoch(a(e)).eventtype '_bT'];
-%     end
-% end 
+% Sleep A500s
+for e = 1:length(a)
+% check that the event type is indeed one of the A500s
+     if strcmp(EEG.epoch(a(e)).eventtype(1:4),'N2A500') % change based on sleep state, for N2, N3, and REM
+         EEG.epoch(a(e)).eventtype = [EEG.epoch(a(e)).eventtype '_bT'];
+     end
+end 
 
-%% Save file in a different name
+% Sleep T500s
+for e = 1:length(t)
+    if strcmp(EEG.epoch(t(e)).eventtype(1:4),'N2T500')
+        EEG.epoch(t(e)).eventtype = [EEG.epoch(t(e)).eventtype '_bT'];
+    end
+end
+
+%% Save EEG
 
 % Navigate to the desired folder where to save the files manually. 
 % Might have to add data per subject manually as well.
@@ -192,5 +192,4 @@ save -mat EEG_32_wake.set EEG
 data = EEG;
 data = 'EEG_32_wake.fdt';
 floatwrite(data(:,:)', 'EEG_32_wake.fdt');
-
 end 
