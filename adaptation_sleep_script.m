@@ -1,4 +1,5 @@
-%% Script to find all relevant indices of A50%% Find the index of all relevant events: A500s and T500s
+%% Script to find relevant indices of A500s and T500s in sleep re-referenced files %% 
+%% Used for ERP plotting per repetition %% 
 
 % The script is used to find "true adaptation" with the A500 adaptors 
 % (when two tones of the same frequency follow each other close in time, i.e., 
