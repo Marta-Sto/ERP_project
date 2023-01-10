@@ -93,9 +93,6 @@ eventtype_beforeT500 = unique(onebeforeT500events);
 % undesired_eventtypes now returns the T500 tones in the list that we do not want. 
 undesired_eventtypes = setdiff(eventtype_beforeT500,sleepeventsA500);
 
-% Sleep 
-% undesired_eventtypes = setdiff(eventtype_beforeT500,sleepeventsA500);
-
 if ~isempty(undesired_eventtypes) % if the cell 'undesired_eventtypes' isn't empty, 
     % create empty vector for data to be deleted
     tbd = []; % 'to be delected' vector
