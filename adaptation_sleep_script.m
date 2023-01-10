@@ -113,21 +113,23 @@ A500sevents      = unique(A500sevents); % now should return only A500 events wit
 
 %% Check T500 events
 
-% Check all T500 events.
+T500sevents      = {EEG.event(sortedALLevents(onebeforeT500) + 1).type};
+T500sevents      = unique(T500sevents);
+
 T500sevents      = {EEG.event(sortedALLevents(onebeforeT500) + 1).type};
 T500sevents      = unique(T500sevents);
 
 % Make sure that T500s only contain the T500 events.
 % This step can be skipped in case there are no anomalies in the cell.
 
-undesired_eventtypes = setdiff(T500sevents,sleepeventsT500); % if other events/undesired events exist,
+undesired_Teventtypes = setdiff(T500sevents,sleepeventsT500); % if other events/undesired events exist,
                                                            % use set diff to find and exclude them
 
-if ~isempty(undesired_eventtypes) % if the cell isn't empty, i.e., there are undesired T events,
+if ~isempty(undesired_Teventtypes) % if the cell isn't empty, i.e., there are undesired T events,
     tbd = [];     % create empty vector for data to be deleted
     for i = 1:length(undesired_Teventtypes) % loop over the undesired events (undesired tones)
         % find undesired events in the list 
-        tbd = [tbd find(strcmp(undesired_eventtypes(i),checkT500events))]; % to exclude
+        tbd = [tbd find(strcmp(undesired_Teventtypes(i),T500sevents))]; % to exclude
     end
 
 % Create new variable without these undesired tones, so leaving only
@@ -136,9 +138,9 @@ desiredT500stimepoints      = T500sevents;
 desiredT500stimepoints(tbd) = []; % the locations of the T500 undesired events
 else 
     desiredT500stimepoints  = T500sevents;
-end                                       
+end 
 
-%% Check the location(s) of the values, i.e., where we know there is a T500
+%% Check the location(s) of the values, i.e., where there are known A500s or T500s
 
 A500sevents = sortedALLevents(onebeforeT500);
 T500sevents = sortedALLevents(loc_T500);
