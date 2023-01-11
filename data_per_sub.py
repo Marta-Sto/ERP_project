@@ -43,7 +43,7 @@ def sub_data(data_path, subj_id):
 
     # Create path to subject file (based on subject id)
     #subject_setfile_wake_n = data_path + '/EEG_' + subj_id + '_wake.set'
-    subject_setfile_sleep = data_path + '/EEG_' + subj_id + 'sleep.set' 
+    subject_setfile_sleep = data_path + '/EEG_' + subj_id + '_sleep.set' 
     
     
     # Read epochs from file
@@ -62,7 +62,7 @@ def sub_data(data_path, subj_id):
 
     for rep in repetitions    
         # tones = ['T500'] 
-        tones = ['A500']
+        tones = ['A500'] # change prefix based on sleep stage aka conscious state
         # tones = ['T650','T845','T1098','T1856','T2413','T3137','T4079','T5302']
 
 
