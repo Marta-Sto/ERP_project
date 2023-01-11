@@ -5,16 +5,14 @@ Created on Wed Jan  4 23:12:01 2023
 
 @author: stojanovic
 
-Function to plot significant clusters in time points between first and last 
-tone repetition across subjects.
+Function to plot significant clusters in time points
+between the first and last tone repetition across subjects.
 
 @author: marta
 """
 
 import mne
 import matplotlib.pyplot as plt 
-# from plot_clusters import plot_cluster_results 
-
 
 def plot_cluster_results(ERP, cluster_stat): 
     """
