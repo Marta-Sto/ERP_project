@@ -61,9 +61,9 @@ def sub_data(data_path, subj_id):
     cropped_evoked  = {}
 
     for rep in repetitions    
-    # tones = ['T500'] 
-    tones = ['A500']
-    # tones = ['T650','T845','T1098','T1856','T2413','T3137','T4079','T5302']
+        # tones = ['T500'] 
+        tones = ['A500']
+        # tones = ['T650','T845','T1098','T1856','T2413','T3137','T4079','T5302']
 
 
     # Concatenate across tones
