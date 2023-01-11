@@ -8,13 +8,14 @@ Created on Mon Oct  3 21:36:28 2022
 """
 
 # Import function to load data per subject 
-# Named N1 because last used for this analysis, 
-# but can be applied to all time intervals 
 from data_per_sub import sub_data
 
 # Data paths (for Marta's laptop/external hard drive)
+data_path = '/Users/stojanovic/Downloads'
 #data_path   = 'D:/ica_interpolated'
-# data_path    = '/Volumes/New Volume/ica_interpolated'
+#data_path  = '/Volumes/New Volume/ica_interpolated'
+# data_path = '/Users/stojanovic/Documents/Projects/Cambridge/Analyses/Adaptor/NewEEGFilesAdaptor'
+
 
 def across_sub(data_path):
     """
@@ -32,8 +33,7 @@ def across_sub(data_path):
 
     """
 
-    # Add the complete list later
-    # check subject 08 for A500_0_bT
+    # Add complete subject list (check subject 08 for A500_0_bT in wake)
     subjects = ['01','02','03','04','05','06','07','17','19','20','21', 
                 '23','24','25','26','27','28','29','30','31','32',
                 '33','34','35','36','37','38']    
@@ -52,5 +52,3 @@ def across_sub(data_path):
             crop_tone_ERP[k].append(sub_dict[k])
                    
     return crop_tone_ERP
-
- # mne.viz.plot_compare_evokeds(evokeds, picks=picks, combine='mean')
